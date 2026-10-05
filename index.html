@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rover Lab: Engineer Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#120f24;--panel:#1c1838;--line:#38326f;--ink:#ecebff;--dim:#a29fd0;--acc:#c6ff4a;
+--motion:#4c97ff;--control:#ffab19;--sensing:#5cb1d6;--vars:#ff8c1a;--events:#ffbf00;--my:#ff6680;--cs:calc(min(92vw,440px)/8)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);font:500 16px/1.45 'Chakra Petch',system-ui,sans-serif;padding:env(safe-area-inset-top,0) 12px env(safe-area-inset-bottom,0)}
+.wrap{max-width:1020px;margin:0 auto}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 0}
+h1{font-size:1.5rem;margin:0}h1 span{color:var(--acc)}
+.pill{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 12px;color:var(--ink);font:inherit;font-size:.9rem;cursor:pointer}
+nav{display:flex;gap:6px;flex-wrap:wrap;width:100%}
+nav button{width:42px;height:42px;border-radius:8px;border:2px solid var(--line);background:var(--panel);color:var(--ink);font:700 1rem inherit;cursor:pointer}
+nav button.done{background:#245a2f;border-color:#53c06a}nav button.cur{border-color:var(--acc);box-shadow:0 0 0 2px #c6ff4a55}
+#brief{background:var(--panel);border-left:5px solid var(--acc);border-radius:8px;padding:12px 16px;margin:8px 0 14px}
+#brief h2{margin:0 0 2px;font-size:1.25rem}#brief p{margin:0}
+details{margin-top:6px;color:var(--dim);font-size:.9rem}summary{cursor:pointer}
+.main{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start}
+@media(max-width:840px){.main{grid-template-columns:1fr}}
+#stagebox{display:flex;flex-direction:column;gap:8px;align-items:center}
+#stage{position:relative;width:calc(var(--cs)*8);height:calc(var(--cs)*8);border-radius:10px;overflow:hidden;border:3px solid var(--line);
+background:linear-gradient(#0000 calc(100% - 1px),#ffffff1c 0) 0 0/100% var(--cs),linear-gradient(90deg,#0000 calc(100% - 1px),#ffffff1c 0) 0 0/var(--cs) 100%,#0b0919}
+.sp{position:absolute;width:var(--cs);height:var(--cs);display:flex;align-items:center;justify-content:center;font-size:calc(var(--cs)*.6);transition:left .3s,top .3s}
+#bot{z-index:3}.arr{position:absolute;inset:0;display:flex;justify-content:center;color:var(--acc);font-style:normal;font-size:calc(var(--cs)*.3);line-height:1;transition:transform .3s}
+.shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+@media(prefers-reduced-motion:reduce){.shake{animation:none}.sp,.arr{transition:none}}
+#hud{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;font-size:.9rem;color:var(--dim)}#hud b{color:var(--ink)}
+#msg{min-height:3em;max-width:calc(var(--cs)*8);text-align:center}#msg.bad{color:#ff8f8f}#msg.good{color:#8fe8a5}
+.panel{background:var(--panel);border-radius:10px;padding:12px;border:1px solid var(--line)}
+.lab{display:flex;justify-content:space-between;color:var(--dim);font-size:.85rem;margin:2px 0 6px}
+#tabs{display:flex;gap:6px;margin-bottom:6px}#tabs button{border:0;border-radius:8px 8px 0 0;padding:6px 14px;background:#2a2558;color:var(--ink);font:700 .9rem inherit;cursor:pointer}#tabs button.on{background:#0b1424;color:var(--acc)}
+#script{min-height:170px;max-height:50vh;overflow:auto;background:#0b1424;border-radius:8px;padding:10px;margin-bottom:10px}
+.hat{display:inline-block;background:var(--events);color:#3a2c00;font-weight:700;border-radius:14px 14px 4px 4px;padding:6px 12px;margin-bottom:4px}.hat.fn{background:var(--my);color:#3a0010}
+.blk{margin:3px 0;border-radius:6px;color:#fff;border:1px solid #0004}
+.blk.motion{background:var(--motion)}.blk.control{background:var(--control);color:#2f1c00}.blk.sensing{background:var(--sensing);color:#052836}.blk.vars{background:var(--vars);color:#2f1600}.blk.my{background:var(--my);color:#3a0010}
+.blk.on{outline:3px solid #fff;box-shadow:0 0 12px #fff8}
+.row{display:flex;align-items:center;gap:6px;padding:7px 10px;font-weight:700;min-height:42px;flex-wrap:wrap}
+.row button{border:0;border-radius:99px;background:#0003;color:inherit;font:700 .95rem inherit;padding:2px 10px;min-height:28px;cursor:pointer}.row .x{margin-left:auto;width:28px;padding:0}
+.zone{margin:0 8px 8px 22px;padding:4px 6px;border-left:6px solid #0003;background:#0002;border-radius:0 6px 6px 0;min-height:34px;cursor:pointer}.zone.tgt{background:#fff3;border-left-color:#fff}
+.zone:empty::before{content:'drop blocks here';font-size:.8rem;opacity:.75;font-weight:500}
+.els{margin:0 8px 0 22px;font-weight:700;font-size:.9rem}
+.pal{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.pal button{border:0;border-radius:6px;padding:10px 12px;min-height:46px;font:700 .95rem inherit;cursor:pointer;color:#fff}
+.pal .motion{background:var(--motion)}.pal .control{background:var(--control);color:#2f1c00}.pal .sensing{background:var(--sensing);color:#052836}.pal .vars{background:var(--vars);color:#2f1600}.pal .my{background:var(--my);color:#3a0010}
+.pal button:disabled{opacity:.3;cursor:not-allowed}
+.ctl{display:flex;gap:8px}.ctl button{flex:1;border:0;border-radius:8px;padding:12px;font:700 1.05rem inherit;cursor:pointer}
+#run{background:var(--acc);color:#1b2a00}#run.stop{background:#e04b4b;color:#fff}#reset{background:#3a3578;color:#fff}#clear{background:#4a2a3a;color:#fff}
+pre{margin:6px 0 0;padding:10px;background:#0b1424;border-radius:8px;color:#b9f27a;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow:auto;max-height:240px}
+button:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.row,.pal button{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+body.dragging,body.dragging *{cursor:grabbing!important;user-select:none}
+.ghost{position:fixed;z-index:50;pointer-events:none;padding:8px 14px;font-weight:700;opacity:.93;box-shadow:0 10px 24px #000a;transform:rotate(-2deg)}
+.ph{height:12px;margin:3px 0;border-radius:6px;background:var(--acc);box-shadow:0 0 10px var(--acc)}
+.zone.over{background:#ffffff40}
+#pal.trash{outline:3px dashed #ff6a6a;outline-offset:5px;border-radius:8px}
+#ov{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:16px;z-index:20}#ov.show{display:flex}
+#card{background:#f4f3ff;color:#120f24;border-radius:14px;padding:24px;max-width:460px;width:100%;text-align:center}
+#card h2{margin:0 0 6px;font-size:1.7rem}.big{font-size:2.6rem}
+#card button,#card input{font:700 1.05rem inherit;border-radius:8px;padding:10px 20px;border:2px solid #120f24;margin:6px 4px}#card button{background:#120f24;color:#fff;cursor:pointer}
+.cert{border:5px double #ffab19;border-radius:10px;padding:14px;margin:10px 0}
+@media print{body{background:#fff}.wrap>*:not(#ov){display:none}#ov{position:static;background:none;display:block}#card button,#card input{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>🤖 Rover Lab: <span>Engineer Edition</span></h1>
+<span class="pill" id="clock">⏱ 00:00 / 60:00</span>
+<span><button class="pill" id="spd">🐢 Normal speed</button> <button class="pill" id="mute">🔊 Sound on</button></span>
+<nav id="nav" aria-label="Missions"></nav>
+</header>
+<div id="brief"><h2 id="st"></h2><p id="sp"></p><details><summary>Teacher notes</summary><span id="tip"></span></details></div>
+<div class="main">
+<div id="stagebox"><div id="stage" aria-label="Rover map"></div>
+<div id="hud"><span>⛽ Fuel <b id="hf">0</b></span><span>count <b id="hs">0</b></span><span>💎 <b id="hp">0/0</b></span><span>Blocks <b id="hb">0</b></span></div>
+<div id="msg" role="status"></div></div>
+<div class="panel">
+<div class="lab"><span>Build your program: drag blocks in, drag to reorder, drop on the palette to delete</span><span id="cnt"></span></div>
+<div id="tabs"></div>
+<div id="script" aria-label="Your program"></div>
+<div class="lab"><span>Blocks</span></div>
+<div class="pal" id="pal"></div>
+<div class="ctl"><button id="run">▶ Run</button><button id="reset">↺ Reset</button><button id="clear">🗑 Clear</button></div>
+<details><summary>See your code as Python</summary><pre id="py"></pre></details>
+</div></div></div>
+<div id="ov"><div id="card"></div></div>
+
+<script>
+var $=function(s){return document.querySelector(s)};
+var B={fwd:{i:'⬆',n:'move forward 1',c:'motion'},left:{i:'↺',n:'turn left 90°',c:'motion'},right:{i:'↻',n:'turn right 90°',c:'motion'},
+rep:{n:'repeat',c:'control',C:1},until:{n:'repeat until',c:'control',C:1,cond:1},if:{n:'if',c:'control',C:1,cond:1},ifelse:{n:'if',c:'control',C:1,cond:1,E:1},
+pick:{i:'💎',n:'pick up sample',c:'sensing'},add:{i:'➕',n:'change count by 1',c:'vars'},call:{i:'🧩',n:'my block',c:'my'}};
+var CN={wall:'obstacle ahead?',clear:'path clear?',sample:'on sample?',goal:'at base?',n3:'count ≥ 3?',rclear:'clear on right?',lclear:'clear on left?'};
+var PC={wall:'rover.obstacle_ahead()',clear:'rover.path_clear()',sample:'rover.on_sample()',goal:'rover.at_base()',n3:'count >= 3',rclear:'rover.clear_right()',lclear:'rover.clear_left()'};
+var PS={fwd:'rover.forward()',left:'rover.turn_left()',right:'rover.turn_right()',pick:'rover.pick_up()',add:'count += 1',call:'my_block()'};
+var uid=0;
+function mk(t,o,body,els){var n={id:++uid,t:t,n:3,cond:t==='until'?'goal':'wall',body:body||[],els:els||[]};for(var k in o)n[k]=o[k];return n}
+function path(p){var c=[];for(var i=0;i<p.length-1;i++){var a=p[i],b=p[i+1],dx=Math.sign(b[0]-a[0]),dy=Math.sign(b[1]-a[1]),x=a[0],y=a[1];for(;;){c.push([x,y]);if(x===b[0]&&y===b[1])break;x+=dx;y+=dy}}return c}
+function walls(c){var r=[];for(var y=0;y<8;y++)for(var x=0;x<8;x++)if(!c.some(function(q){return q[0]===x&&q[1]===y}))r.push([x,y]);return r}
+var P1=[[0,7],[5,7],[5,5],[1,5],[1,3],[6,3],[6,1],[2,1]],P2=P1.map(function(p){return[7-p[0],p[1]]});
+var FB=['fwd','left','right'],ALLC=['goal','wall','clear','sample','n3','rclear','lclear'];
+var LV=[
+{t:'Mission 1: Fuel Efficient',s:'Rover-X has exactly 14 units of fuel. Every move forward costs 1 (turns are free). Fly diagonally to the base using as few blocks as you can.',tip:'Introduces the fuel limit. Ask: what is the shortest possible route? Look for the 4-block staircase pattern. About 5 minutes.',start:[0,7,0],goal:[7,0],samples:[],rocks:[],allow:FB.concat('rep'),conds:[],max:5,par:5,fuel:14},
+{t:'Mission 2: Function Factory',s:'You have a block budget of 10, and the route repeats the same staircase twice. Open the "my block" tab, define the staircase once, then call it with the 🧩 block.',tip:'Abstraction: define once, reuse many times. Compare block counts with and without the function. About 8 minutes.',start:[0,7,1],goal:[6,3],samples:[],rocks:[],allow:FB.concat('rep','call'),conds:[],max:10,par:10,fuel:10,fn:1},
+{t:'Mission 3: Quota',s:'Mission control needs exactly 3 samples, not more. Use the count variable: repeat until count ≥ 3, picking up and counting. Then drive to the base.',tip:'Variables as counters controlling a loop. Discuss: what happens if you forget to change count? About 7 minutes.',start:[0,7,1],goal:[7,7],samples:[[1,7],[2,7],[3,7],[4,7],[5,7]],rocks:[],allow:FB.concat('until','pick','add'),conds:['goal','n3','wall'],max:8,par:6,fuel:7,need:'quota'},
+{t:'Mission 4: Debug the Function',s:'A teammate wrote this program for a staircase going down and right. It has 2 bugs, one in the function and one in the main program. Run it, observe, and fix both.',tip:'Bugs: the function ends with a right turn instead of left, and the first repeat count is 1 instead of 2. Ask pairs to predict before running. About 8 minutes.',start:[0,0,1],goal:[6,4],samples:[],rocks:[],allow:FB.concat('rep','call'),conds:[],max:10,par:10,fuel:10,fn:1,
+pre:function(){return{main:[mk('rep',{n:1},[mk('call')]),mk('rep',{n:2},[mk('fwd')]),mk('rep',{n:2},[mk('call')])],fn:[mk('fwd'),mk('right'),mk('fwd'),mk('right')]}}},
+{t:'Mission 5: Right-Hand Rule',s:'A twisting tunnel with no map! Robots can escape any simple maze by keeping a hand on the right wall: if clear on right, turn right and move; else if the path ahead is clear, move; else turn left. Repeat until base.',tip:'A classic algorithm. Nest an if/else inside the else of another if/else. Trace the rule by hand at the first two corners. About 9 minutes.',start:[0,7,1],goal:[2,1],samples:[],rocks:walls(path(P1)),allow:['fwd','left','right','until','ifelse'],conds:['goal','wall','clear','rclear'],max:8,par:7,fuel:26},
+{t:'Mission 6: Sweep Machine',s:'Scan the top 4 rows for 8 samples 💎 and finish at the base. Build a "sweep" function (check, move, repeat across a row) and call it with U-turns in a loop. Watch out for the sample at the end of each row!',tip:'Combines function, nested loops, and if. Off-by-one trap: a row sweep checks 7 cells before moving; the final cell needs a check too. About 12 minutes.',start:[0,0,1],goal:[0,4],samples:[[3,0],[7,0],[0,1],[5,1],[2,2],[7,2],[4,3],[0,3]],rocks:[],allow:FB.concat('rep','if','pick','call'),conds:['sample','wall','clear'],max:16,par:15,fuel:32,fn:1},
+{t:'Mission 7: Mirror Maze',s:'Same kind of tunnel, but mirrored, and the rover starts on the right. Your right-hand rule will fail. Adapt the algorithm to follow the left wall.',tip:'Reflection: what changes when the maze flips? Which blocks do students swap, and why? About 7 minutes.',start:[7,7,3],goal:[5,1],samples:[],rocks:walls(path(P2)),allow:['fwd','left','right','until','ifelse'],conds:['goal','wall','clear','rclear','lclear'],max:8,par:7,fuel:26},
+{t:'Mission 8: Engineer Showcase 🏆',s:'Design your own rover program. Use at least 8 blocks including a loop, an if block, the count variable, and your own 🧩 block. Collect samples if you like, and make it run without crashing.',tip:'Open-ended. Ask each pair to present their algorithm in one sentence and open the Python view. About 10 minutes.',start:[3,3,0],goal:null,samples:[[5,3],[3,5],[3,1]],rocks:[[1,1],[6,1],[1,6],[6,6]],allow:FB.concat('rep','until','if','ifelse','pick','add','call'),conds:ALLC,max:20,fuel:60,fn:1,need:'free'}
+];
+var cur=0,script=[],fnS=[],ed='main',tgt=script,running=false,S={},done={},mute=false,ac,t0=0,D=420,DX=[0,1,0,-1],DY=[-1,0,1,0];
+function root(){return ed==='main'?script:fnS}
+function beep(f,d){if(mute)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=f;g.gain.value=.04;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+(d||.1))}catch(e){}}
+document.addEventListener('click',function(){if(t0)return;t0=Date.now();setInterval(function(){var s=Math.floor((Date.now()-t0)/1000),m=Math.floor(s/60),r=s%60;$('#clock').textContent='⏱ '+(m<10?'0':'')+m+':'+(r<10?'0':'')+r+' / 60:00'},1000)});
+$('#mute').onclick=function(){mute=!mute;this.textContent=mute?'🔇 Sound off':'🔊 Sound on'};
+$('#spd').onclick=function(){D=D===420?170:420;this.textContent=D===420?'🐢 Normal speed':'🐇 Fast speed'};
+function msg(t,k){var m=$('#msg');m.textContent=t;m.className=k||''}
+function cnt(l){return l.reduce(function(a,n){return a+1+cnt(n.body)+cnt(n.els)},0)}
+function total(){return cnt(script)+cnt(fnS)}
+function has(l,ts){return l.some(function(n){return ts.indexOf(n.t)>-1||has(n.body,ts)||has(n.els,ts)})}
+function rm(l,n){var i=l.indexOf(n);if(i>-1){l.splice(i,1);return l}for(var k=0;k<l.length;k++){var r=rm(l[k].body,n)||rm(l[k].els,n);if(r)return r}return null}
+function nav(){var n=$('#nav');n.innerHTML='';LV.forEach(function(l,i){var b=document.createElement('button');b.textContent=done[i]?'✓':i+1;b.className=(done[i]?'done ':'')+(i===cur?'cur':'');b.setAttribute('aria-label','Mission '+(i+1));b.onclick=function(){if(!running)load(i)};n.appendChild(b)})}
+function sprite(id,x,y,h){var d=document.createElement('div');d.className='sp';d.id=id;d.style.left='calc(var(--cs)*'+x+')';d.style.top='calc(var(--cs)*'+y+')';d.innerHTML=h;$('#stage').appendChild(d)}
+function hud(){var L=LV[cur];$('#hs').textContent=S.n||0;$('#hf').textContent=S.fuel;$('#hp').textContent=Object.keys(S.got||{}).length+'/'+L.samples.length;$('#hb').textContent=total()+'/'+L.max}
+function drawStage(){var L=LV[cur];$('#stage').innerHTML='';
+L.rocks.forEach(function(r,i){sprite('r'+i,r[0],r[1],'🧱')});
+if(L.goal)sprite('goal',L.goal[0],L.goal[1],'📡');
+L.samples.forEach(function(p,i){sprite('sm'+i,p[0],p[1],'💎')});
+sprite('bot',L.start[0],L.start[1],'<span>🤖</span><i class="arr">▲</i>');
+S={x:L.start[0],y:L.start[1],d:L.start[2],ang:L.start[2]*90,got:{},n:0,steps:0,fuel:L.fuel};$('#bot .arr').style.transform='rotate('+S.ang+'deg)';hud()}
+function load(i){cur=i;var L=LV[i],p=L.pre?L.pre():{main:[],fn:[]};script=p.main;fnS=p.fn;ed='main';tgt=script;$('#st').textContent=L.t;$('#sp').textContent=L.s;$('#tip').textContent=L.tip;drawStage();msg('Drag blocks into your program, or just tap them.');nav();rs()}
+function rs(){renderTabs();renderScript();renderPal();hud();$('#cnt').textContent=total()+' / '+LV[cur].max+' blocks';$('#py').textContent=toPy()}
+function renderTabs(){var t=$('#tabs');t.innerHTML='';if(!LV[cur].fn)return;[['main','Main program'],['fn','🧩 My block']].forEach(function(a){var b=document.createElement('button');b.textContent=a[1];b.className=ed===a[0]?'on':'';b.onclick=function(){if(running)return;ed=a[0];tgt=root();rs()};t.appendChild(b)})}
+function rl(list,cont){list.forEach(function(n){var b=B[n.t],w=document.createElement('div');w.className='blk '+b.c;w.dataset.id=n.id;
+var h=document.createElement('div');h.className='row';h.append((b.i||'')+' '+b.n+' ');h.addEventListener('pointerdown',function(e){if(e.target.closest('button'))return;startDrag(e,{node:n,el:w})});
+if(n.t==='rep'){var c=document.createElement('button');c.textContent=n.n+' times';c.onclick=function(e){e.stopPropagation();if(running)return;n.n=n.n>=10?1:n.n+1;rs()};h.appendChild(c)}
+if(b.cond){var q=document.createElement('button');q.textContent=CN[n.cond];q.onclick=function(e){e.stopPropagation();if(running)return;var cs=LV[cur].conds,j=cs.indexOf(n.cond);n.cond=cs[(j+1)%cs.length];rs()};h.appendChild(q);if(n.t!=='until')h.append(' then')}
+var x=document.createElement('button');x.className='x';x.textContent='✕';x.setAttribute('aria-label','Remove block');x.onclick=function(e){e.stopPropagation();if(running)return;tgt=rm(script,n)||rm(fnS,n)||root();rs()};h.appendChild(x);w.appendChild(h);
+if(b.C){var z=zone(n.body);rl(n.body,z);w.appendChild(z);if(b.E){var e2=document.createElement('div');e2.className='els';e2.textContent='else';w.appendChild(e2);var z2=zone(n.els);rl(n.els,z2);w.appendChild(z2)}}
+cont.appendChild(w)})}
+function zone(l){var z=document.createElement('div');z.className='zone'+(tgt===l?' tgt':'');z._list=l;z.onclick=function(e){e.stopPropagation();if(!running){tgt=l;rs()}};return z}
+function renderScript(){var s=$('#script'),r0=root();s.innerHTML='<div class="hat'+(ed==='fn'?' fn':'')+'">'+(ed==='fn'?'define 🧩 my block':'when 🏁 clicked')+'</div>';var r=document.createElement('div');r.className='zone'+(tgt===r0?' tgt':'');r.style.marginLeft='0';r._list=r0;r.style.minHeight='110px';r.onclick=function(){if(!running){tgt=r0;rs()}};rl(r0,r);s.appendChild(r)}
+function renderPal(){var p=$('#pal');p.innerHTML='';var L=LV[cur],full=total()>=L.max;L.allow.forEach(function(k){var b=document.createElement('button');b.className=B[k].c;b.textContent=(B[k].i?B[k].i+' ':'')+B[k].n;b.disabled=running||full;
+b.addEventListener('pointerdown',function(e){startDrag(e,{kind:k,label:b.textContent,cls:B[k].c})});b.onclick=function(){if(dragged)return;var n=mk(k);tgt.push(n);if(B[k].C)tgt=n.body;beep(500,.06);rs()};p.appendChild(b)})}
+function py(l,d){var p='    '.repeat(d);if(!l.length)return p+'pass\n';return l.map(function(n){var t=n.t;if(PS[t])return p+PS[t]+'\n';
+var h=t==='rep'?'for _ in range('+n.n+'):':t==='until'?'while not '+PC[n.cond]+':':'if '+PC[n.cond]+':';
+return p+h+'\n'+py(n.body,d+1)+(t==='ifelse'?p+'else:\n'+py(n.els,d+1):'')}).join('')}
+function toPy(){var L=LV[cur],s='';if(L.fn)s+='def my_block():\n'+py(fnS,1)+'\n';if(has(script,['add'])||has(fnS,['add']))s+='count = 0\n';return s+py(script,0)}
+function hl(id){document.querySelectorAll('#script .blk').forEach(function(e){e.classList.toggle('on',id&&e.dataset.id==id)})}
+function blocked(x,y){return x<0||y<0||x>7||y>7||LV[cur].rocks.some(function(r){return r[0]===x&&r[1]===y})}
+function sampleAt(){var L=LV[cur];for(var i=0;i<L.samples.length;i++)if(!S.got[i]&&L.samples[i][0]===S.x&&L.samples[i][1]===S.y)return i;return -1}
+function test(c){var L=LV[cur],d=S.d;
+if(c==='wall')return blocked(S.x+DX[d],S.y+DY[d]);if(c==='clear')return!blocked(S.x+DX[d],S.y+DY[d]);
+if(c==='rclear'){d=(d+1)%4;return!blocked(S.x+DX[d],S.y+DY[d])}if(c==='lclear'){d=(d+3)%4;return!blocked(S.x+DX[d],S.y+DY[d])}
+if(c==='sample')return sampleAt()>-1;if(c==='n3')return S.n>=3;return!!L.goal&&S.x===L.goal[0]&&S.y===L.goal[1]}
+var sleep=function(ms){return new Promise(function(r){setTimeout(r,ms)})};
+function place(){var b=$('#bot');b.style.left='calc(var(--cs)*'+S.x+')';b.style.top='calc(var(--cs)*'+S.y+')';b.querySelector('.arr').style.transform='rotate('+S.ang+'deg)'}
+function fail(m){throw{fail:m}}
+async function ex(l){for(var i=0;i<l.length;i++)await one(l[i])}
+async function one(n){if(!running)throw{stop:1};if(++S.steps>1500)fail('The program never stopped. Check your loop condition 🔁');hl(n.id);var t=n.t;
+if(t==='fwd'){var nx=S.x+DX[S.d],ny=S.y+DY[S.d];
+if(blocked(nx,ny)){$('#bot').classList.add('shake');beep(140,.25);await sleep(400);fail('💥 Bump! The rover hit a wall. Use a sensor or fix the path.')}
+if(S.fuel<=0)fail('⛽ Out of fuel! Find a shorter route or a smarter algorithm.');
+S.fuel--;S.x=nx;S.y=ny;place();hud();beep(380,.06);await sleep(D)}
+else if(t==='left'||t==='right'){S.d=(S.d+(t==='left'?3:1))%4;S.ang+=t==='left'?-90:90;place();beep(300,.05);await sleep(D*.7)}
+else if(t==='pick'){var i=sampleAt();if(i<0)fail('No sample here! Ask the sensor first with an if block 🔍');S.got[i]=1;$('#sm'+i).style.visibility='hidden';beep(900,.15);hud();await sleep(D*.6)}
+else if(t==='add'){S.n++;hud();beep(700,.08);await sleep(D*.5)}
+else if(t==='call'){await ex(fnS);hl(n.id)}
+else if(t==='rep'){for(var k=0;k<n.n;k++){await ex(n.body);hl(n.id)}}
+else if(t==='until'){while(!test(n.cond)){if(++S.steps>1500)fail('The program never stopped. Check your loop condition 🔁');await ex(n.body);hl(n.id);await sleep(50)}}
+else{await sleep(D*.4);if(test(n.cond))await ex(n.body);else if(t==='ifelse')await ex(n.els)}}
+function chk(){var L=LV[cur],g=Object.keys(S.got).length;
+if(L.need==='free'){if(total()<8)return'Use at least 8 blocks.';if(!has(script.concat(fnS),['rep','until']))return'Add a loop block.';if(!has(script.concat(fnS),['if','ifelse']))return'Add an if block with a sensor.';if(!has(script.concat(fnS),['add']))return'Use the count variable (change count by 1).';if(!has(script,['call']))return'Call your own 🧩 block from the main program.';return''}
+if(S.x!==L.goal[0]||S.y!==L.goal[1])return'The rover stopped at column '+(S.x+1)+', row '+(S.y+1)+'. It is not at the base yet.';
+if(L.need==='quota'&&g!==3)return'You picked up '+g+' samples but the quota is exactly 3.';
+if(g<L.samples.length)return'Some samples are still out there 💎 ('+g+'/'+L.samples.length+'). Find the ones you missed.';return''}
+async function run(){if(running){running=false;return}
+if(!script.length){msg('Add some blocks to the main program first!','bad');return}
+drawStage();running=true;$('#run').textContent='■ Stop';$('#run').className='stop';renderPal();msg('Running...');
+try{await ex(script);var e=chk();if(e)msg(e,'bad');else win()}
+catch(x){if(x.fail)msg(x.fail,'bad');else if(x.stop)msg('Stopped.');else throw x}
+running=false;hl(null);$('#run').textContent='▶ Run';$('#run').className='';renderPal();$('#bot').classList.remove('shake')}
+function win(){var L=LV[cur],ok=!L.par||total()<=L.par;done[cur]=1;nav();msg('Mission complete!','good');beep(880,.15);setTimeout(function(){beep(1175,.25)},180);
+var c=$('#card');
+if(cur===LV.length-1){c.innerHTML='<div class="big">🏆</div><h2>Engineering complete!</h2><div class="cert"><p>This certificate is awarded to</p><h2 id="nm">Rover Engineer</h2><p>for mastering functions, variables, loops, sensors and algorithms in Rover Lab.</p></div><input id="name" placeholder="Type your name" maxlength="24" aria-label="Your name"><br><button id="pr">🖨 Print</button><button id="again">Play again</button>';
+$('#name').oninput=function(){$('#nm').textContent=this.value||'Rover Engineer'};$('#pr').onclick=function(){window.print()};$('#again').onclick=function(){done={};$('#ov').classList.remove('show');load(0)}}
+else{c.innerHTML='<div class="big">✅</div><h2>Mission complete!</h2><p>'+(ok?'Efficient solution: '+total()+' blocks, '+(L.fuel-S.fuel)+' fuel used.':'It works with '+total()+' blocks. Can you do it in '+L.par+' or fewer?')+'</p><button id="nx">Next mission ▶</button><button id="rt">Stay here</button>';
+$('#nx').onclick=function(){$('#ov').classList.remove('show');load(cur+1)};$('#rt').onclick=function(){$('#ov').classList.remove('show')}}
+$('#ov').classList.add('show');setTimeout(function(){var f=c.querySelector('button');if(f)f.focus()},50)}
+var dragged=false;
+function fl(l,n){if(l.indexOf(n)>-1)return l;for(var k=0;k<l.length;k++){var r=fl(l[k].body,n)||fl(l[k].els,n);if(r)return r}return null}
+function startDrag(e,d){if(running||(e.pointerType==='mouse'&&e.button!==0))return;
+var x0=e.clientX,y0=e.clientY,on=false,ghost=null,ph=null,z0=null,idx=0,trash=false;
+function clear(){if(ph){ph.remove();ph=null}document.querySelectorAll('.zone.over').forEach(function(z){z.classList.remove('over')});$('#pal').classList.remove('trash');z0=null;trash=false}
+function mv(ev){
+if(!on){if(Math.hypot(ev.clientX-x0,ev.clientY-y0)<7)return;on=true;dragged=true;document.body.classList.add('dragging');
+ghost=document.createElement('div');ghost.className='ghost blk '+(d.node?B[d.node.t].c:d.cls);
+ghost.textContent=d.node?((B[d.node.t].i||'')+' '+B[d.node.t].n):d.label;document.body.appendChild(ghost);if(d.el)d.el.style.opacity='.3'}
+ghost.style.left=(ev.clientX+10)+'px';ghost.style.top=(ev.clientY+10)+'px';
+clear();var els=document.elementsFromPoint(ev.clientX,ev.clientY),z=null;
+for(var i=0;i<els.length;i++){var q=els[i];if(q.classList&&q.classList.contains('zone')&&!(d.el&&d.el.contains(q))){z=q;break}}
+if(z){z0=z;var kids=z.querySelectorAll(':scope > .blk');idx=kids.length;
+for(var k=0;k<kids.length;k++){var r=kids[k].getBoundingClientRect();if(ev.clientY<r.top+r.height/2){idx=k;break}}
+ph=document.createElement('div');ph.className='ph';z.insertBefore(ph,kids[idx]||null);z.classList.add('over')}
+else if(d.node&&els.some(function(q){return q.closest&&q.closest('#pal')})){trash=true;$('#pal').classList.add('trash')}}
+function end(ev){window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',cancel);
+setTimeout(function(){dragged=false},60);
+if(!on)return;if(ghost)ghost.remove();document.body.classList.remove('dragging')}
+function cancel(){z0=null;trash=false;end();clear();rs()}
+function up(){var list=z0&&z0._list,tr=trash,i=idx;end();clear();
+if(list){if(d.node){var ol=fl(script,d.node)||fl(fnS,d.node);if(ol){var oi=ol.indexOf(d.node);ol.splice(oi,1);if(ol===list&&oi<i)i--;list.splice(i,0,d.node);tgt=list}}
+else if(total()>=LV[cur].max)msg('Block limit reached. Remove a block first.','bad');
+else{var n=mk(d.kind);list.splice(i,0,n);tgt=B[d.kind].C?n.body:list;beep(500,.06)}}
+else if(tr){var o2=fl(script,d.node)||fl(fnS,d.node);if(o2){o2.splice(o2.indexOf(d.node),1);tgt=root()}}
+if(on)rs()}
+window.addEventListener('pointermove',mv);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',cancel)}
+$('#run').onclick=run;
+$('#reset').onclick=function(){if(!running){drawStage();msg('Rover reset to the start.')}};
+$('#clear').onclick=function(){if(!running){var p=LV[cur].pre;if(ed==='fn')fnS.length=0;else script.length=0;tgt=root();drawStage();rs();msg('Cleared this tab.')}};
+load(0);
+</script>
+</body>
+</html>
